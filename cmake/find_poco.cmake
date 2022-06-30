@@ -1,4 +1,4 @@
-find_package (Poco REQUIRED Foundation Net JSON Util)
+find_package (Poco REQUIRED Foundation Net JSON Util XML)
 
 if (Poco_FOUND)
 	message(STATUS "Using Poco: ${Poco_VERSION} : ${Poco_INCLUDE_DIRS}, ${Poco_LIBRARIES}")

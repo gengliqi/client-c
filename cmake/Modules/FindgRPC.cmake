@@ -171,7 +171,7 @@ function(protobuf_generate_grpc)
       get_filename_component(_abs_path ${_abs_file} PATH)
       list(FIND _protobuf_include_path ${_abs_path} _contains_already)
       if(${_contains_already} EQUAL -1)
-          list(APPEND _protobuf_include_path -I ${_abs_path})
+        list(APPEND _protobuf_include_path -I ${_abs_path})
       endif()
     endforeach()
   else()
@@ -182,7 +182,7 @@ function(protobuf_generate_grpc)
     get_filename_component(ABS_PATH ${DIR} ABSOLUTE)
     list(FIND _protobuf_include_path ${ABS_PATH} _contains_already)
     if(${_contains_already} EQUAL -1)
-        list(APPEND _protobuf_include_path -I ${ABS_PATH})
+      list(APPEND _protobuf_include_path -I ${ABS_PATH})
     endif()
   endforeach()
 
@@ -195,7 +195,7 @@ function(protobuf_generate_grpc)
 
     set(_possible_rel_dir)
     if(NOT protobuf_generate_grpc_APPEND_PATH)
-        set(_possible_rel_dir ${_rel_dir}/)
+      set(_possible_rel_dir ${_rel_dir}/)
     endif()
 
     set(_generated_srcs)
@@ -211,15 +211,15 @@ function(protobuf_generate_grpc)
     list(APPEND _generated_srcs_all ${_generated_srcs})
 
     add_custom_command(
-      OUTPUT ${_generated_srcs}
-      COMMAND protobuf::protoc
-      ARGS --${protobuf_generate_grpc_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_grpc_PROTOC_OUT_DIR}
-           --grpc_out ${_dll_export_decl}${protobuf_generate_grpc_PROTOC_OUT_DIR}
-           --plugin=protoc-gen-grpc=$<TARGET_FILE:${protobuf_generate_grpc_PLUGIN}>
-           ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
-      DEPENDS ${_abs_file} protobuf::protoc ${protobuf_generate_grpc_PLUGIN}
-      COMMENT "Running ${protobuf_generate_grpc_LANGUAGE} protocol buffer compiler on ${_proto}"
-      VERBATIM)
+            OUTPUT ${_generated_srcs}
+            COMMAND protobuf::protoc
+            ARGS --${protobuf_generate_grpc_LANGUAGE}_out ${_dll_export_decl}${protobuf_generate_grpc_PROTOC_OUT_DIR}
+            --grpc_out ${_dll_export_decl}${protobuf_generate_grpc_PROTOC_OUT_DIR}
+            --plugin=protoc-gen-grpc=$<TARGET_FILE:${protobuf_generate_grpc_PLUGIN}>
+            ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
+            DEPENDS ${_abs_file} protobuf::protoc ${protobuf_generate_grpc_PLUGIN}
+            COMMENT "Running ${protobuf_generate_grpc_LANGUAGE} protocol buffer compiler on ${_proto}"
+            VERBATIM)
   endforeach()
 
   set_source_files_properties(${_generated_srcs_all} PROPERTIES GENERATED TRUE)
@@ -248,24 +248,27 @@ find_library(gRPC_CPP_LIBRARY NAMES grpc++)
 find_library(gRPC_UNSECURE_LIBRARY NAMES grpc_unsecure)
 find_library(gRPC_CPP_UNSECURE_LIBRARY NAMES grpc++_unsecure)
 find_library(gRPC_CARES_LIBRARY NAMES cares)
+find_library(gRPC_GPR_LIBRARY NAMES gpr)
+find_library(gRPC_ADDRESS_SORTING_LIBRARY NAMES address_sorting)
+find_library(gRPC_UPB_LIBRARY NAMES upb)
 
 set(gRPC_LIBRARIES)
 if(gRPC_USE_UNSECURE_LIBRARIES)
-  if(gRPC_UNSECURE_LIBRARY)
-    set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_UNSECURE_LIBRARY})
-  endif()
   if(gRPC_CPP_UNSECURE_LIBRARY)
     set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_CPP_UNSECURE_LIBRARY})
   endif()
-else()
-  if(gRPC_LIBRARY)
-    set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_LIBRARY})
+  if(gRPC_UNSECURE_LIBRARY)
+    set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_UNSECURE_LIBRARY})
   endif()
+else()
   if(gRPC_CPP_UNSECURE_LIBRARY)
     set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_CPP_LIBRARY})
   endif()
+  if(gRPC_LIBRARY)
+    set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_LIBRARY})
+  endif()
 endif()
-set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_CARES_LIBRARY})
+set(gRPC_LIBRARIES ${gRPC_LIBRARIES} ${gRPC_CARES_LIBRARY} ${gRPC_GPR_LIBRARY} ${gRPC_ADDRESS_SORTING_LIBRARY} ${gRPC_UPB_LIBRARY})
 
 # Restore the original find library ordering.
 if(gRPC_USE_STATIC_LIBS)
@@ -286,46 +289,46 @@ endif()
 
 # Get full path to plugin.
 find_program(gRPC_CPP_PLUGIN
-             NAMES grpc_cpp_plugin
-             DOC "The plugin for generating gRPC client and server C++ stubs from `.proto` files") 
+        NAMES grpc_cpp_plugin
+        DOC "The plugin for generating gRPC client and server C++ stubs from `.proto` files")
 
 find_program(gRPC_PYTHON_PLUGIN
-             NAMES grpc_python_plugin
-             DOC "The plugin for generating gRPC client and server Python stubs from `.proto` files")
+        NAMES grpc_python_plugin
+        DOC "The plugin for generating gRPC client and server Python stubs from `.proto` files")
 
 # Add imported targets.
 if(gRPC_CPP_LIBRARY AND NOT TARGET grpc++)
   add_library(grpc++ UNKNOWN IMPORTED)
   set_target_properties(grpc++ PROPERTIES
-                        IMPORTED_LOCATION "${gRPC_CPP_LIBRARY}")
+          IMPORTED_LOCATION "${gRPC_CPP_LIBRARY}")
   set_target_properties(grpc++ PROPERTIES
-                        INTERFACE_INCLUDE_DIRECTORIES ${gRPC_INCLUDE_DIRS})
+          INTERFACE_INCLUDE_DIRECTORIES ${gRPC_INCLUDE_DIRS})
 endif()
 
 if(gRPC_CPP_UNSECURE_LIBRARY AND NOT TARGET grpc++_unsecure)
   add_library(grpc++_unsecure UNKNOWN IMPORTED)
   set_target_properties(grpc++_unsecure PROPERTIES
-                        IMPORTED_LOCATION "${gRPC_CPP_UNSECURE_LIBRARY}")
+          IMPORTED_LOCATION "${gRPC_CPP_UNSECURE_LIBRARY}")
   set_target_properties(grpc++_unsecure PROPERTIES
-                        INTERFACE_INCLUDE_DIRECTORIES ${gRPC_INCLUDE_DIRS})
+          INTERFACE_INCLUDE_DIRECTORIES ${gRPC_INCLUDE_DIRS})
 endif()
 
 if(gRPC_CPP_PLUGIN AND NOT TARGET grpc_cpp_plugin)
   add_executable(grpc_cpp_plugin IMPORTED)
   set_target_properties(grpc_cpp_plugin PROPERTIES
-                        IMPORTED_LOCATION "${gRPC_CPP_PLUGIN}")
+          IMPORTED_LOCATION "${gRPC_CPP_PLUGIN}")
 endif()
 
 if(gRPC_PYTHON_PLUGIN AND NOT TARGET grpc_python_plugin)
   add_executable(grpc_python_plugin IMPORTED)
   set_target_properties(grpc_python_plugin PROPERTIES
-                        IMPORTED_LOCATION "${gRPC_PYTHON_PLUGIN}")
+          IMPORTED_LOCATION "${gRPC_PYTHON_PLUGIN}")
 endif()
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(gRPC
-                                  REQUIRED_VARS gRPC_LIBRARY gRPC_CPP_LIBRARY gRPC_UNSECURE_LIBRARY gRPC_CPP_UNSECURE_LIBRARY gRPC_CARES_LIBRARY
-                                                gRPC_INCLUDE_DIR gRPC_CPP_INCLUDE_DIR gRPC_CPP_PLUGIN gRPC_PYTHON_PLUGIN)
+        REQUIRED_VARS gRPC_LIBRARY gRPC_CPP_LIBRARY gRPC_UNSECURE_LIBRARY gRPC_CPP_UNSECURE_LIBRARY gRPC_CARES_LIBRARY
+        gRPC_INCLUDE_DIR gRPC_CPP_INCLUDE_DIR gRPC_CPP_PLUGIN gRPC_PYTHON_PLUGIN)
 
 if(gRPC_FOUND)
   if(gRPC_DEBUG)
